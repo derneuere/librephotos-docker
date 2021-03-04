@@ -1,0 +1,27 @@
+{{- if .Values.backend.persistence.enabled -}}
+{{- if not .Values.backend.persistence.existingClaim -}}
+apiVersion: "v1"
+kind: "PersistentVolumeClaim"
+metadata:
+{{- if .Values.backend.persistence.annotations }}
+  annotations:
+{{ toYaml .Values.backend.persistence.annotations | indent 4 }}
+{{- end }}
+  labels:
+    {{- include "librephotos.backend.labels" . | nindent 4 }}
+  name: {{ template "librephotos.backend.fullname" . }}
+spec:
+  accessModes:
+{{ toYaml .Values.backend.persistence.accessModes | indent 4 }}
+{{- if .Values.backend.persistence.storageClass }}
+{{- if (eq "-" .Values.backend.persistence.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.backend.persistence.storageClass }}"
+{{- end }}
+{{- end }}
+  resources:
+    requests:
+      storage: "{{ .Values.backend.persistence.size }}"
+{{- end -}}
+{{- end -}}

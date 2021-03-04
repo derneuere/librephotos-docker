@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-echo "installing frontend"
-npm install
-
 echo "serving frontend"
 if [ "$DEBUG" = 1 ]
 then
