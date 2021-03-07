@@ -19,5 +19,9 @@
         "C0111"
     ],
     "python.linting.pylintEnabled": true,
-    "python.sortImports.path": "isort"
+    "python.sortImports.path": "isort",
+	"[yaml]": {
+		"editor.insertSpaces": true,
+		"editor.tabSize": 2
+	}
 }

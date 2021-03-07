@@ -1,6 +1,5 @@
 #! /bin/bash
 export PYTHONUNBUFFERED=TRUE
-mkdir -p /logs
 
 python image_similarity/main.py 2>&1 | tee /logs/gunicorn_image_similarity.log &
 python manage.py showmigrations | tee /logs/show_migrate.log
@@ -9,6 +8,7 @@ python manage.py showmigrations | tee /logs/show_migrate.log
 python manage.py build_similarity_index 2>&1 | tee /logs/command_build_similarity_index.log
 python manage.py clear_cache
 python manage.py createadmin -u $ADMIN_USERNAME $ADMIN_EMAIL 2>&1 | tee /logs/command_createadmin.log
+
 
 echo "Running backend server..."
 

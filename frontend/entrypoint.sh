@@ -1,12 +1,8 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-echo "serving frontend"
-if [ "$DEBUG" = 1 ]
-then
-    echo "develompent running frontend"
-    npm run start
-else
-    echo "productions running frontend"
-    serve build -d -l 3000
-fi
-# DANGEROUSLY_DISABLE_HOST_CHECK=true HOST=0.0.0.0 npm start
+# below can be leverged for runtime variable replacement against index.html.
+# sed -i 's~window.env={initialized:!1}~window.env={initialized:true,REACT_APP_SENTRY_DSN:"'"$REACT_APP_SENTRY_DSN"'",REACT_APP_BACKEND_URL:"'"$REACT_APP_BACKEND_URL"'"}~g' /usr/share/nginx/html/index.html
+
+# ln -s index.html 404.html
+
+exec "$@"
