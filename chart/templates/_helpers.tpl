@@ -41,6 +41,19 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 {{- end }}
 {{- end }}
+{{- define "librephotos.proxy.fullname" -}}
+{{- if .Values.fullnameOverride }}
+{{- printf "%s-%s" "pxy" .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- if contains $name .Release.Name }}
+{{- printf "%s-%s" "pxy" .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s-%s" "pxy" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+{{- end }}
+
 
 {{/*
 Create chart name and version as used by the chart label.
@@ -68,6 +81,14 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
+{{- define "librephotos.proxy.labels" -}}
+helm.sh/chart: {{ include "librephotos.chart" . }}
+{{ include "librephotos.proxy.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
 
 {{/*
 Selector labels
@@ -78,5 +99,9 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 {{- define "librephotos.backend.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "librephotos.name" . }}-backend
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+{{- define "librephotos.proxy.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "librephotos.name" . }}-proxy
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}

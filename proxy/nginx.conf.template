@@ -16,19 +16,19 @@ http {
       error_page 404 /;
       proxy_intercept_errors on;
       proxy_set_header Host $host;
-      proxy_pass http://frontend:3000/;
+      proxy_pass http://${FRONTEND_HOST}:3000/;
     }
     location ~ ^/(api|media)/ {
       proxy_set_header X-Forwarded-Proto $scheme;
       proxy_set_header X-Real-IP $remote_addr;
-      proxy_set_header Host backend;
+      proxy_set_header Host ${BACKEND_HOST};
       include uwsgi_params;
-      proxy_pass http://backend:8001;
+      proxy_pass http://${BACKEND_HOST}:8001;
     }
     # Django media
     location /protected_media  {
         internal;
-        alias /protected_media/;      
+        alias /protected_media/;
     }
 
     # Original Photos

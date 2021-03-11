@@ -6,6 +6,7 @@ fullnameOverride: ''
 
 env:
   DEBUG: 0
+  LOGLEVEL: info
   # Username for the Administrator login.
   ADMIN_USERNAME: admin
   # Email for the administrative user.
@@ -14,8 +15,6 @@ env:
   #  Leave blank to autogenerate, but you'll need to inspect
   #  the secret manually to get the password then
   ADMIN_PASSWORD: ''
-  # this should be the FQDN or IP address of your site that you'll access it from
-  BACKEND_HOST: librephotos.example.com
   # Do you want to see on a map where all your photos where taken (if a location is stored in your photos)
   # Get a Map box API Key https://account.mapbox.com/auth/signup/
   MAPBOX_API_KEY: ''
@@ -68,7 +67,7 @@ backend:
 
   service:
     type: ClusterIP
-    port: 80
+    port: 8001
 
   ingress:
     enabled: true
@@ -140,7 +139,7 @@ frontend:
 
   service:
     type: ClusterIP
-    port: 80
+    port: 3000
 
   ingress:
     enabled: true
@@ -176,6 +175,68 @@ frontend:
     maxReplicas: 100
     targetCPUUtilizationPercentage: 80
     # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  podAnnotations: {}
+
+  podSecurityContext:
+    {}
+    # fsGroup: 2000
+
+  securityContext:
+    {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+proxy:
+  replicaCount: 1
+  image:
+    repository: reallibrephotos/librephotos
+    pullPolicy: IfNotPresent
+    tag: 'dev'
+  imagePullSecrets: []
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ingress:
+    enabled: true
+    annotations:
+      {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /api
+          - path: /media
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources:
+    {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
 
   nodeSelector: {}
 

@@ -97,9 +97,11 @@ spec:
               protocol: TCP
           env:
             - name: BACKEND_HOST
-              value: "{{ .Values.env.BACKEND_HOST }}"
+              value: {{ include "librephotos.backend.fullname" . | quote }}
             - name: DEBUG
               value: "{{ .Values.env.DEBUG }}"
+            - name: LOGLEVEL
+              value: "{{ .Values.env.LOGLEVEL }}"
             - name: ADMIN_USERNAME
               value: "{{ .Values.env.ADMIN_USERNAME }}"
             - name: ADMIN_EMAIL
@@ -188,6 +190,87 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.backend.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: storage
+        {{- if .Values.backend.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ if .Values.backend.persistence.existingClaim }}{{ .Values.backend.persistence.existingClaim }}{{- else }}{{ template "librephotos.backend.fullname" . }}{{- end }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "librephotos.proxy.fullname" . }}
+  labels:
+    {{- include "librephotos.proxy.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.proxy.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "librephotos.proxy.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.proxy.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "librephotos.proxy.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.proxy.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.proxy.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-backend
+          securityContext:
+            {{- toYaml .Values.proxy.securityContext | nindent 12 }}
+          image: "{{ .Values.proxy.image.repository }}:{{ .Values.proxy.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.proxy.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          env:
+            - name: BACKEND_HOST
+              value: {{ include "librephotos.backend.fullname" . | quote }}
+            - name: FRONTEND_HOST
+              value: {{ include "librephotos.frontend.fullname" . | quote }}
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 120
+            periodSeconds: 60
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 120
+            periodSeconds: 60
+          volumeMounts:
+          - mountPath: /data
+            name: storage
+            subPath: storage
+          - mountPath: /protected_media
+            name: storage
+            subPath: protected_media
+          resources:
+            {{- toYaml .Values.proxy.resources | nindent 12 }}
+      {{- with .Values.proxy.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.proxy.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.proxy.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
