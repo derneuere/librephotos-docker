@@ -5,7 +5,7 @@ ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV PATH=${CONDA_DIR}/bin:${PATH}
 
 # system packages installation
-RUN apt update && apt install -y unzip ca-certificates curl libopenblas-dev libmagic1 libboost-all-dev libxrender-dev liblapack-dev git bzip2 cmake build-essential libsm6 libglib2.0-0 libgl1-mesa-glx libheif-dev libffi-dev swig --no-install-recommends
+RUN apt update && apt install -y unzip ca-certificates curl libopenblas-dev libmagic1 libboost-all-dev libxrender-dev liblapack-dev git bzip2 cmake build-essential libsm6 libglib2.0-0 libgl1-mesa-glx libheif-dev libffi-dev swig cmake --no-install-recommends
 
 FROM base AS conda
 RUN mkdir -p /opt/conda && \
